@@ -14,7 +14,7 @@ export default function App() {
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true
         });
-        const { recording } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
         setRecording(recording);
       }
     } catch (err) {}
@@ -43,7 +43,7 @@ export default function App() {
 
   function getRecordingLines() {
     return recordings.map((recordingLine, index) => {
-      return (
+            return (
         <View key={index} style={styles.row}>
           <Text style={styles.fill}>
             Recording #{index + 1} | {recordingLine.duration}
