@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, View, Button, Pressable} from 'react-native';
 import { Audio } from 'expo-av';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function App() {
   const [recording, setRecording] = React.useState();
-  const [recordings, setRecordings] = React.useState([]);
 
   async function startRecording() {
     try {
@@ -22,47 +22,13 @@ export default function App() {
 
   async function stopRecording() {
     setRecording(undefined);
-
-    await recording.stopAndUnloadAsync();
-    let allRecordings = [...recordings];
-    const { sound, status } = await recording.createNewLoadedSoundAsync();
-    allRecordings.push({
-      sound: sound,
-      duration: getDurationFormatted(status.durationMillis),
-      file: recording.getURI()
-    });
-
-    setRecordings(allRecordings);
-  }
-
-  function getDurationFormatted(milliseconds) {
-    const minutes = milliseconds / 1000 / 60;
-    const seconds = Math.round((minutes - Math.floor(minutes)) * 60);
-    return seconds < 10 ? `${Math.floor(minutes)}:0${seconds}` : `${Math.floor(minutes)}:${seconds}`
-  }
-
-  function getRecordingLines() {
-    return recordings.map((recordingLine, index) => {
-            return (
-        <View key={index} style={styles.row}>
-          <Text style={styles.fill}>
-            Recording #{index + 1} | {recordingLine.duration}
-          </Text>
-          <Button onPress={() => recordingLine.sound.replayAsync()} title="Play"></Button>
-        </View>
-      );
-    });
-  }
-
-  function clearRecordings() {
-    setRecordings([])
   }
 
   return (
     <View style={styles.container}>
-      <Button title={recording ? 'Stop Recording' : 'Start Recording\n\n\n'} onPress={recording ? stopRecording : startRecording} />
-      {getRecordingLines()}
-      <Button title={recordings.length > 0 ? '\n\n\nClear Recordings' : ''} onPress={clearRecordings} />
+      <Pressable style={[styles.pressable, { backgroundColor: recording ? '#ff3333' : '#444950' }]}  onPress={recording ? stopRecording : startRecording}>
+        <Icon name="microphone" style={styles.icon} />
+      </Pressable>
     </View>
   );
 }
@@ -70,19 +36,19 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#20232a',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  pressable: {
+    borderRadius: 40,
+    width: 70,
+    height: 70,
     justifyContent: 'center',
-    marginLeft: 10,
-    marginRight: 40
+    alignItems: 'center',
   },
-  fill: {
-    flex: 1,
-    margin: 15
+  icon: {
+    color: 'white',
+    fontSize: 30,
   }
 });
