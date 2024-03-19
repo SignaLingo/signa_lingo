@@ -66,5 +66,6 @@ jobs:
     # Remove original fetched file and sed bak file
     - name: Delete app spec
       run: |
+        cat app.yaml &&\
         rm app.yaml &&\
         rm app.yaml.bak
