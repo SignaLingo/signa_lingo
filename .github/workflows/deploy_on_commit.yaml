@@ -57,12 +57,14 @@ jobs:
     # Replace the docker image tag with our new version
     - name: Modify tag to deploy the latest (bumped) version
       run: |
-        sed -i 'tag: ${{ steps.tag_version.outputs.previous_version }}/tag: ${{ steps.tag_version.outputs.new_version }}/' app.yaml
+        sed -i.bak 's/tag: ${{ steps.tag_version.outputs.previous_version }}/tag: ${{ steps.tag_version.outputs.new_version }}/' app.yaml
 
     # Push the change to Digital Ocean (which will trigger a new deployment)
     - name: Push updated app spec
       run: doctl apps update ${{ secrets.DIGITALOCEAN_APP_ID }} --spec app.yaml
 
+    # Remove original fetched file and sed bak file
     - name: Delete app spec
       run: |
-        rm app.yaml
+        rm app.yaml &&\
+        rm app.yaml.bak
