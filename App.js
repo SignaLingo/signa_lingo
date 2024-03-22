@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Button, Pressable} from 'react-native';
 import { Audio } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@0.6.0/dist/index.min.js";
 
 export default function App() {
   const [recording, setRecording] = React.useState();
