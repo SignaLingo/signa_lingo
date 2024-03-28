@@ -4,7 +4,6 @@ import { Audio, Recording, ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getVideoFromText } from './lib/callAPI';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import { client } from '@gradio/client';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -50,7 +49,8 @@ export default function App() {
     }
     setDataOutput("Data : Transcribing your file ...");
     //const app = await client(spaceName, {hf_token : readingToken});
-    const app = await client("openai/whisper");
+    //const app = await client("openai/whisper");
+    const app = await client("hf-audio/whisper-large-v3");
     await updateHardware(writingToken,spaceName,"cpu-basic");
     const submission = await app.submit("/predict_1", [audioFile, "transcribe"]);
     setIsTranscribing(true);
