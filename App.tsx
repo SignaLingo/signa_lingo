@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Pressable, Text } from 'react-native';
-import { Audio, Recording } from 'expo-av';
+import { StyleSheet, View, Pressable, Text, TextInput } from 'react-native';
+import { Audio, Recording, ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getVideoFromText } from './lib/callAPI';
 // import { client } from '@gradio/client'
 
 export default function App() {
@@ -56,15 +57,32 @@ export default function App() {
     
   }
 
+  const [videoURL, setVideoURL] = useState<string | null>()
+  const video = React.useRef(null);	
   return (
     <View style={styles.container}>
       <View style={styles.mainContainer}>
-        {displayMainContent()}
+    	<Video
+			style={styles.video}
+			ref={video}
+			useNativeControls
+			source={{
+				uri: videoURL as string
+			}}
+			resizeMode={ResizeMode.CONTAIN}
+			videoStyle={{'position': 'relative'}}
+		/>
       </View>
       <View style={styles.bottomContainer}>
         <Pressable style={[styles.pressable, { backgroundColor: recording ? '#ff3333' : '#444950' }]} onPress={recording ? stopRecording : startRecording}>
           <Icon name="microphone" style={styles.icon} />
         </Pressable>
+		<TextInput 
+			style={styles.input}
+			onChangeText={text => {
+				getVideoFromText(text).then(url => setVideoURL(url))
+			}}
+		/>
         <Pressable style={[styles.pressable, { backgroundColor: '#444950'}]} onPress={todo()}>
           <Icon name="upload" style={styles.icon} />
         </Pressable>
@@ -97,6 +115,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'system-ui,-apple-system,sans-serif',
     fontSize: 18,
+  },
+  input: {
+  	backgroundColor: 'white'
+  },
+  video: {
+	backgroundColor: 'white',
+	alignSelf: 'center',
+	width: 320,
+	height: 320
   },
   pressable: {
     borderRadius: 40,
