@@ -156,7 +156,7 @@ export default function App() {
     }
     else if (lastRec) {
       return (
-        <img style={styles.sl} src="slPlaceholder.png"/>
+        <img style={styles.sl} src="./assets/slPlaceholder.png"/>
       );
     }
     else {
