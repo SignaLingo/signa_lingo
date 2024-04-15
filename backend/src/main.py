@@ -3,14 +3,13 @@ from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
 import string
 import random
-import base64
 
 app = FastAPI()
 
 def random_string(length: int = 5) -> str:
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
 
-@app.post("/poseToVideo")
+@app.post("/pose-to-video")
 async def pose_to_video(request: Request):
     filename: str = random_string()
     file_path: str = f'mp4Files/{filename}.mp4'
@@ -30,9 +29,3 @@ async def pose_to_video(request: Request):
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Content-Disposition"] = f"attachment; filename={filename}.mp4"
     return response
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="127.0.0.1", port=8000)
-
