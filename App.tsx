@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Platform, Alert, StyleSheet, View, Pressable, Text, TextInput } from 'react-native';
-import { Audio, Recording, ResizeMode, Video } from 'expo-av';
+import { Alert, StyleSheet, View, Pressable, Text, TextInput } from 'react-native';
+import { Audio, ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getVideoFromText } from './lib/callAPI';
 import * as DocumentPicker from 'expo-document-picker';
@@ -10,7 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 export default function App() {
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
-  const [lastRec, setLastRec] = useState<Recording.SoundObject>();
+  const [lastRec, setLastRec] = useState<any>();
   const [audioFile, setAudioFile] = useState({ name: '', data: '' });
   const [dataOutput, setDataOutput] = useState('Data');
   const [statusOutput, setStatusOutput] = useState('Status');
@@ -18,13 +18,14 @@ export default function App() {
   const readingToken = "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";
   const writingToken = "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";
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const blobToBase64 = (blob) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    return new Promise((resolve) => {
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+  	return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
       reader.onloadend = () => {
-        resolve(reader.result);
+        resolve(reader.result as string);
       };
+      reader.readAsDataURL(blob);
     });
   };
 
@@ -50,15 +51,15 @@ export default function App() {
     setDataOutput("Data : Transcribing your file ...");
     //const app = await client(spaceName, {hf_token : readingToken});
     //const app = await client("openai/whisper");
-    const app = await client("hf-audio/whisper-large-v3");
+    const app = await client("hf-audio/whisper-large-v3", {});
     await updateHardware(writingToken,spaceName,"cpu-basic");
-    const submission = await app.submit("/predict_1", [audioFile, "transcribe"]);
+    const submission = app.submit("/predict_1", [audioFile, "transcribe"]);
     setIsTranscribing(true);
     submission.on("data", (data) => {
         console.log(data);
-        setDataOutput(data.data[0]);
+        setDataOutput(data.data[0] as string);
         setIsTranscribing(false);
-
+		getVideoFromText(data.data[0] as string).then(url => setVideoURL(url))
         updateHardware(writingToken,spaceName,"cpu-basic");
     });
     submission.on("status", (status) => {
@@ -105,21 +106,21 @@ export default function App() {
     } catch (err) {}
   }
 
-  async function uriToBase64(uri: String){
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        reject(new TypeError("Network request failed"));
-      };
-      xhr.responseType = "blob";
-      xhr.open("GET", uri, true);
-      xhr.send(null);
-    });
-    const base64 = await blobToBase64(blob);
-    return base64
+  async function uriToBase64(uri: string): Promise<string> {
+    try {
+    // Use fetch to get the response as a blob
+      const response = await fetch(uri);
+      if (!response.ok) {
+        throw new TypeError('Network request failed');
+      }
+      const blob = await response.blob();
+
+      // Convert blob to Base64
+      return await blobToBase64(blob);
+    } catch (error) {
+      console.error('Error converting URI to Base64:', error);
+      throw error; // Re-throw to handle this error further up in your application
+    }
   }
 
   async function stopRecording() {
@@ -127,7 +128,7 @@ export default function App() {
       await recording.stopAndUnloadAsync();
       setLastRec(await recording.createNewLoadedSoundAsync());
       const audioURI = recording.getURI();
-      const audioBase64 = await uriToBase64(audioURI);
+      const audioBase64 = await uriToBase64(audioURI as string);
       setAudioFile({
         name: "http://localhost:8081/audio",
         data: audioBase64.split(",")[1],
@@ -138,7 +139,7 @@ export default function App() {
 
   async function pickDocument() {
     let result = await DocumentPicker.getDocumentAsync({});
-    const file = result.assets[0]
+    const file = result.assets?.[0] as DocumentPicker.DocumentPickerAsset
     setAudioFile({
       name: file.name,
       data: file.uri.split(",")[1],
@@ -194,19 +195,9 @@ export default function App() {
           <MaterialIcons name="transcribe" style={styles.icon} />
         </Pressable>
         <Pressable style={[styles.pressable, { backgroundColor: '#444950'}]} onPress={pickDocument}>
-        <Icon name="upload" style={styles.icon} />
-      </Pressable>
-		<TextInput 
-			style={styles.input}
-			onChangeText={text => {
-				getVideoFromText(text).then(url => setVideoURL(url))
-			}}
-		/>
-        <Pressable style={[styles.pressable, { backgroundColor: '#444950'}]} onPress={todo()}>
           <Icon name="upload" style={styles.icon} />
-        </Pressable>
+      	</Pressable>
       </View>
-      <Text style={styles.text}>Name: {audioFile.name}</Text>
     </View>
   );
 }
