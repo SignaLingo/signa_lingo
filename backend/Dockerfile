@@ -4,13 +4,14 @@ FROM python:3.9-slim as builder
 # Set the working directory in the container
 WORKDIR /usr/app
 
-# Opencv sys dep it need to run
+# Install OpenCV system dependencies needed for building and runtime
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
     libxrender-dev
+
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
 
@@ -22,6 +23,14 @@ RUN . venv/bin/activate && pip install --no-cache-dir -r requirements.txt
 FROM python:3.9-slim
 
 WORKDIR /usr/app
+
+# Install runtime dependencies for OpenCV
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1
 
 # Copy virtual environment from the builder stage
 COPY --from=builder /usr/app/venv ./venv
@@ -38,3 +47,4 @@ EXPOSE 8080
 
 # Run the application using the virtual environment
 CMD ["./venv/bin/uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
