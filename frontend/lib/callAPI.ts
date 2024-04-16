@@ -8,11 +8,11 @@ export const getVideoFromText = async (text: string, spoken: string = 'fr', sign
 	const byteArray: Uint8Array = new Uint8Array(arrayBuffer)
 
 	// TODO a mettre dans une variable d'environnement (l'url du backend).!!
-    const responseVideo = await fetch('signalingo.xyz/backend/pose-to-video', {
-        method: 'POST',
+  const responseVideo = await fetch('https://signalingo.xyz/backend/pose-to-video', {
+    method: 'POST',
 		mode: 'cors',
 		body: JSON.stringify({ data : byteArray.join() })
-    })
+  })
 	const blob = await responseVideo.blob();
 	const url = URL.createObjectURL(blob);
 	return url
