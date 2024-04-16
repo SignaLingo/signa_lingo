@@ -4,6 +4,10 @@ FROM python:3.9-slim as builder
 # Set the working directory in the container
 WORKDIR /usr/app
 
+# Opencv sys dep it need to run
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-dev
+
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
 
