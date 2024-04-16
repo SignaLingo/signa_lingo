@@ -4,7 +4,7 @@ from pose_format.pose_visualizer import PoseVisualizer
 import string
 import random
 
-app = FastAPI()
+app = FastAPI(root_path="/backend")
 
 def random_string(length: int = 5) -> str:
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
