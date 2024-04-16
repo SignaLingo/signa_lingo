@@ -6,8 +6,11 @@ WORKDIR /usr/app
 
 # Opencv sys dep it need to run
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-dev
-
+    libgl1-mesa-dev \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
 
