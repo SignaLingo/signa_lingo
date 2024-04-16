@@ -9,6 +9,14 @@ app = FastAPI()
 def random_string(length: int = 5) -> str:
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
 
+@app.get("/health")
+async def health_check():
+    try:
+        # todo perform health check here
+        return {"status": "healthy"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Health check failed")
+
 @app.post("/pose-to-video")
 async def pose_to_video(request: Request):
     filename: str = random_string()
