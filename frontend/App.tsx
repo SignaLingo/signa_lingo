@@ -1,28 +1,21 @@
-import React, { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  View,
-  Pressable,
-  Text,
-  TextInput,
-} from "react-native";
-import { Audio, ResizeMode, Video } from "expo-av";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { getVideoFromText } from "./lib/callAPI";
-import * as DocumentPicker from "expo-document-picker";
-import { client } from "@gradio/client";
-import { MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from 'react';
+import { Alert, StyleSheet, View, Pressable, Text, TextInput } from 'react-native';
+import { Audio, ResizeMode, Video } from 'expo-av';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { getVideoFromText } from './lib/callAPI';
+import * as DocumentPicker from 'expo-document-picker';
+import { client } from '@gradio/client';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function App() {
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
   const [lastRec, setLastRec] = useState<any>();
-  const [audioFile, setAudioFile] = useState({ name: "", data: "" });
-  const [dataOutput, setDataOutput] = useState("Data");
-  const [statusOutput, setStatusOutput] = useState("Status");
-  const spaceName = "tlemagny/signalingo_whisper";
-  const readingToken = "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";
-  const writingToken = "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";
+  const [audioFile, setAudioFile] = useState({ name: '', data: '' });
+  const [dataOutput, setDataOutput] = useState('Data');
+  const [statusOutput, setStatusOutput] = useState('Status');
+  const spaceName = 'tlemagny/signalingo_whisper';
+  const readingToken = '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';
+  const writingToken = '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';
   const [isTranscribing, setIsTranscribing] = useState(false);
   const blobToBase64 = (blob: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -37,39 +30,37 @@ export default function App() {
 
   async function transcribe() {
     if (!audioFile.name) {
-      Alert.alert("No file given", "No audio file given as input.", [
-        { text: "OK" },
-      ]);
-      console.log("No audio file given as input.");
+      Alert.alert('No file given', 'No audio file given as input.', [{ text: 'OK' }]);
+      console.log('No audio file given as input.');
       return;
     }
     if (isTranscribing) {
       Alert.alert(
-        "Transcription in Progress",
-        "Transcription is already in progress. Please wait.",
-        [{ text: "OK" }],
+        'Transcription in Progress',
+        'Transcription is already in progress. Please wait.',
+        [{ text: 'OK' }]
       );
-      console.log("Transcription is already in progress. Please wait.");
+      console.log('Transcription is already in progress. Please wait.');
       return;
     }
-    setDataOutput("Data : Transcribing your file ...");
+    setDataOutput('Data : Transcribing your file ...');
     //const app = await client(spaceName, {hf_token : readingToken});
     //const app = await client("openai/whisper");
-    const app = await client("hf-audio/whisper-large-v3", {});
-    await updateHardware(writingToken, spaceName, "cpu-basic");
-    const submission = app.submit("/predict_1", [audioFile, "transcribe"]);
+    const app = await client('hf-audio/whisper-large-v3', {});
+    await updateHardware(writingToken, spaceName, 'cpu-basic');
+    const submission = app.submit('/predict_1', [audioFile, 'transcribe']);
     setIsTranscribing(true);
-    submission.on("data", (data) => {
+    submission.on('data', (data) => {
       console.log(data);
       setDataOutput(data.data[0] as string);
       setIsTranscribing(false);
       getVideoFromText(data.data[0] as string).then((url) => setVideoURL(url));
-      updateHardware(writingToken, spaceName, "cpu-basic");
+      updateHardware(writingToken, spaceName, 'cpu-basic');
     });
-    submission.on("status", (status) => {
+    submission.on('status', (status) => {
       console.log(status);
       setStatusOutput(
-        `Status: ${status.stage}, Queue Position: ${status.position}, Queue Size: ${status.size}`,
+        `Status: ${status.stage}, Queue Position: ${status.position}, Queue Size: ${status.size}`
       );
     });
   }
@@ -78,41 +69,41 @@ export default function App() {
     hfToken: String,
     spaceName: String,
     hardwareFlavor: String,
-    sleepTimeSeconds = 3600,
+    sleepTimeSeconds = 3600
   ) {
     const url = `https://huggingface.co/api/spaces/${spaceName}/hardware`;
     const headers = {
       Authorization: `Bearer ${hfToken}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json'
     };
     const body = JSON.stringify({
       flavor: hardwareFlavor,
-      sleepTimeSeconds: sleepTimeSeconds,
+      sleepTimeSeconds: sleepTimeSeconds
     });
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: headers,
-      body: body,
+      body: body
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const data = await response.json();
-    console.log("Hardware update response:", data);
+    console.log('Hardware update response:', data);
     return data;
   }
 
   async function startRecording() {
     try {
       const perm = await Audio.requestPermissionsAsync();
-      if (perm.status === "granted") {
+      if (perm.status === 'granted') {
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
+          playsInSilentModeIOS: true
         });
         const { recording: newRecording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY,
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
         setRecording(newRecording);
       }
@@ -124,14 +115,14 @@ export default function App() {
       // Use fetch to get the response as a blob
       const response = await fetch(uri);
       if (!response.ok) {
-        throw new TypeError("Network request failed");
+        throw new TypeError('Network request failed');
       }
       const blob = await response.blob();
 
       // Convert blob to Base64
       return await blobToBase64(blob);
     } catch (error) {
-      console.error("Error converting URI to Base64:", error);
+      console.error('Error converting URI to Base64:', error);
       throw error; // Re-throw to handle this error further up in your application
     }
   }
@@ -143,8 +134,8 @@ export default function App() {
       const audioURI = recording.getURI();
       const audioBase64 = await uriToBase64(audioURI as string);
       setAudioFile({
-        name: "http://localhost:8081/audio",
-        data: audioBase64.split(",")[1],
+        name: 'http://localhost:8081/audio',
+        data: audioBase64.split(',')[1]
       });
       setRecording(undefined);
     }
@@ -155,7 +146,7 @@ export default function App() {
     const file = result.assets?.[0] as DocumentPicker.DocumentPickerAsset;
     setAudioFile({
       name: file.name,
-      data: file.uri.split(",")[1],
+      data: file.uri.split(',')[1]
     });
   }
 
@@ -179,32 +170,26 @@ export default function App() {
           ref={video}
           useNativeControls
           source={{
-            uri: videoURL as string,
+            uri: videoURL as string
           }}
           resizeMode={ResizeMode.CONTAIN}
-          videoStyle={{ position: "relative" }}
+          videoStyle={{ position: 'relative' }}
         />
         <Text style={styles.text}>Status: {statusOutput}</Text>
         <Text style={styles.text}>Data: {dataOutput}</Text>
       </View>
       <View style={styles.bottomContainer}>
         <Pressable
-          style={[
-            styles.pressable,
-            { backgroundColor: recording ? "#ff3333" : "#444950" },
-          ]}
+          style={[styles.pressable, { backgroundColor: recording ? '#ff3333' : '#444950' }]}
           onPress={recording ? stopRecording : startRecording}
         >
           <Icon name="microphone" style={styles.icon} />
         </Pressable>
-        <Pressable
-          style={[styles.pressable, { backgroundColor: "#444950" }]}
-          onPress={transcribe}
-        >
+        <Pressable style={[styles.pressable, { backgroundColor: '#444950' }]} onPress={transcribe}>
           <MaterialIcons name="transcribe" style={styles.icon} />
         </Pressable>
         <Pressable
-          style={[styles.pressable, { backgroundColor: "#444950" }]}
+          style={[styles.pressable, { backgroundColor: '#444950' }]}
           onPress={pickDocument}
         >
           <Icon name="upload" style={styles.icon} />
@@ -217,51 +202,51 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#20232a",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#20232a',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   mainContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 8
   },
   bottomContainer: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 2
   },
   text: {
-    color: "white",
-    fontFamily: "system-ui,-apple-system,sans-serif",
-    fontSize: 18,
+    color: 'white',
+    fontFamily: 'system-ui,-apple-system,sans-serif',
+    fontSize: 18
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: 'white'
   },
   video: {
-    backgroundColor: "white",
-    alignSelf: "center",
+    backgroundColor: 'white',
+    alignSelf: 'center',
     width: 320,
-    height: 320,
+    height: 320
   },
   pressable: {
     borderRadius: 40,
     width: 70,
     height: 70,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginLeft: 10,
-    marginRight: 10,
+    marginRight: 10
   },
   icon: {
-    color: "white",
-    fontSize: 30,
+    color: 'white',
+    fontSize: 30
   },
   sl: {
-    width: "90%",
-  },
+    width: '90%'
+  }
 });
