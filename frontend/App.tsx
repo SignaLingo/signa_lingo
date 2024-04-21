@@ -17,6 +17,7 @@ export default function App() {
   const readingToken = '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';
   const writingToken = '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';
   const [isTranscribing, setIsTranscribing] = useState(false);
+
   const blobToBase64 = (blob: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -35,11 +36,7 @@ export default function App() {
       return;
     }
     if (isTranscribing) {
-      Alert.alert(
-        'Transcription in Progress',
-        'Transcription is already in progress. Please wait.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Transcription in Progress', 'Transcription is already in progress. Please wait.', [{ text: 'OK' }]);
       console.log('Transcription is already in progress. Please wait.');
       return;
     }
@@ -59,32 +56,25 @@ export default function App() {
     });
     submission.on('status', (status) => {
       console.log(status);
-      setStatusOutput(
-        `Status: ${status.stage}, Queue Position: ${status.position}, Queue Size: ${status.size}`
-      );
+      setStatusOutput(`Status: ${status.stage}, Queue Position: ${status.position}, Queue Size: ${status.size}`);
     });
   }
 
-  async function updateHardware(
-    hfToken: String,
-    spaceName: String,
-    hardwareFlavor: String,
-    sleepTimeSeconds = 3600
-  ) {
+  async function updateHardware(hfToken: String, spaceName: String, hardwareFlavor: String, sleepTimeSeconds = 3600) {
     const url = `https://huggingface.co/api/spaces/${spaceName}/hardware`;
     const headers = {
       Authorization: `Bearer ${hfToken}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
     const body = JSON.stringify({
       flavor: hardwareFlavor,
-      sleepTimeSeconds: sleepTimeSeconds
+      sleepTimeSeconds: sleepTimeSeconds,
     });
 
     const response = await fetch(url, {
       method: 'POST',
       headers: headers,
-      body: body
+      body: body,
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -100,7 +90,7 @@ export default function App() {
       if (perm.status === 'granted') {
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
-          playsInSilentModeIOS: true
+          playsInSilentModeIOS: true,
         });
         const { recording: newRecording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
@@ -135,7 +125,7 @@ export default function App() {
       const audioBase64 = await uriToBase64(audioURI as string);
       setAudioFile({
         name: 'http://localhost:8081/audio',
-        data: audioBase64.split(',')[1]
+        data: audioBase64.split(',')[1],
       });
       setRecording(undefined);
     }
@@ -146,7 +136,7 @@ export default function App() {
     const file = result.assets?.[0] as DocumentPicker.DocumentPickerAsset;
     setAudioFile({
       name: file.name,
-      data: file.uri.split(',')[1]
+      data: file.uri.split(',')[1],
     });
   }
 
@@ -170,7 +160,7 @@ export default function App() {
           ref={video}
           useNativeControls
           source={{
-            uri: videoURL as string
+            uri: videoURL as string,
           }}
           resizeMode={ResizeMode.CONTAIN}
           videoStyle={{ position: 'relative' }}
@@ -188,10 +178,7 @@ export default function App() {
         <Pressable style={[styles.pressable, { backgroundColor: '#444950' }]} onPress={transcribe}>
           <MaterialIcons name="transcribe" style={styles.icon} />
         </Pressable>
-        <Pressable
-          style={[styles.pressable, { backgroundColor: '#444950' }]}
-          onPress={pickDocument}
-        >
+        <Pressable style={[styles.pressable, { backgroundColor: '#444950' }]} onPress={pickDocument}>
           <Icon name="upload" style={styles.icon} />
         </Pressable>
       </View>
@@ -204,34 +191,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#20232a',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   mainContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flexGrow: 8
+    flexGrow: 8,
   },
   bottomContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexGrow: 2
+    flexGrow: 2,
   },
   text: {
     color: 'white',
     fontFamily: 'system-ui,-apple-system,sans-serif',
-    fontSize: 18
+    fontSize: 18,
   },
   input: {
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   video: {
     backgroundColor: 'white',
     alignSelf: 'center',
     width: 320,
-    height: 320
+    height: 320,
   },
   pressable: {
     borderRadius: 40,
@@ -240,13 +227,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 10,
-    marginRight: 10
+    marginRight: 10,
   },
   icon: {
     color: 'white',
-    fontSize: 30
+    fontSize: 30,
   },
   sl: {
-    width: '90%'
-  }
+    width: '90%',
+  },
 });
