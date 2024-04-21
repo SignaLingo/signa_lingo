@@ -1,15 +1,10 @@
-export default {
+module.exports = {
   env: {
     browser: true,
     commonjs: true,
     es2021: true,
   },
-  extends: [
-    'standard-with-typescript',
-    'plugin:react/recommended',
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
+  extends: ['plugin:react/recommended', 'eslint:recommended'],
   overrides: [
     {
       env: {
@@ -28,5 +23,7 @@ export default {
     project: './tsconfig.json',
   },
   plugins: ['react', '@typescript-eslint'],
-  rules: {},
+  rules: {
+    'no-extra-semi': 'off',
+  },
 };

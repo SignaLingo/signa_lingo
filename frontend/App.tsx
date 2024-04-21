@@ -18,9 +18,9 @@ export default function App() {
   const writingToken = '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';
   const [isTranscribing, setIsTranscribing] = useState(false);
 
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  const blobToBase64 = async (blob): Promise<string> => {
+    return await new Promise((resolve, reject) => {
+      const reader = new FilvmeReader();
       reader.onerror = reject;
       reader.onloadend = () => {
         resolve(reader.result as string);
@@ -41,8 +41,8 @@ export default function App() {
       return;
     }
     setDataOutput('Data : Transcribing your file ...');
-    //const app = await client(spaceName, {hf_token : readingToken});
-    //const app = await client("openai/whisper");
+    // const app = await client(spaceName, {hf_token : readingToken});
+    // const app = await client("openai/whisper");
     const app = await client('hf-audio/whisper-large-v3', {});
     await updateHardware(writingToken, spaceName, 'cpu-basic');
     const submission = app.submit('/predict_1', [audioFile, 'transcribe']);
@@ -51,7 +51,9 @@ export default function App() {
       console.log(data);
       setDataOutput(data.data[0] as string);
       setIsTranscribing(false);
-      getVideoFromText(data.data[0] as string).then((url) => setVideoURL(url));
+      getVideoFromText(data.data[0] as string).then((url) => {
+        setVideoURL(url);
+      });
       updateHardware(writingToken, spaceName, 'cpu-basic');
     });
     submission.on('status', (status) => {
@@ -60,7 +62,7 @@ export default function App() {
     });
   }
 
-  async function updateHardware(hfToken: String, spaceName: String, hardwareFlavor: String, sleepTimeSeconds = 3600) {
+  async function updateHardware(hfToken: string, spaceName: string, hardwareFlavor: string, sleepTimeSeconds = 3600) {
     const url = `https://huggingface.co/api/spaces/${spaceName}/hardware`;
     const headers = {
       Authorization: `Bearer ${hfToken}`,
@@ -68,13 +70,13 @@ export default function App() {
     };
     const body = JSON.stringify({
       flavor: hardwareFlavor,
-      sleepTimeSeconds: sleepTimeSeconds,
+      sleepTimeSeconds,
     });
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: headers,
-      body: body,
+      headers,
+      body,
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -122,7 +124,7 @@ export default function App() {
       await recording.stopAndUnloadAsync();
       setLastRec(await recording.createNewLoadedSoundAsync());
       const audioURI = recording.getURI();
-      const audioBase64 = await uriToBase64(audioURI as string);
+      const audioBase64 = await uriToBase64(audioURI!);
       setAudioFile({
         name: 'http://localhost:8081/audio',
         data: audioBase64.split(',')[1],
@@ -132,8 +134,8 @@ export default function App() {
   }
 
   async function pickDocument() {
-    let result = await DocumentPicker.getDocumentAsync({});
-    const file = result.assets?.[0] as DocumentPicker.DocumentPickerAsset;
+    const result = await DocumentPicker.getDocumentAsync({});
+    const file = result.assets?.[0]!;
     setAudioFile({
       name: file.name,
       data: file.uri.split(',')[1],
@@ -160,7 +162,7 @@ export default function App() {
           ref={video}
           useNativeControls
           source={{
-            uri: videoURL as string,
+            uri: videoURL!,
           }}
           resizeMode={ResizeMode.CONTAIN}
           videoStyle={{ position: 'relative' }}
