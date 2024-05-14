@@ -20,7 +20,7 @@ export default function App() {
 
   const blobToBase64 = async (blob): Promise<string> => {
     return await new Promise((resolve, reject) => {
-      const reader = new FilvmeReader();
+      const reader = new FileReader();
       reader.onerror = reject;
       reader.onloadend = () => {
         resolve(reader.result as string);
