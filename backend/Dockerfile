@@ -19,7 +19,6 @@ COPY requirements.txt .
 RUN python -m venv venv
 RUN . venv/bin/activate && pip install --no-cache-dir -r requirements.txt
 
-# Use a multi-stage build to keep the final image clean and small
 FROM python:3.9-slim
 
 WORKDIR /usr/app
@@ -42,9 +41,7 @@ COPY src/ ./src/
 RUN useradd -m myuser
 USER myuser
 
-# Inform Docker that the container is listening on the specified port at runtime.
 EXPOSE 8080
 
-# Run the application using the virtual environment
 CMD ["./venv/bin/uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
 
