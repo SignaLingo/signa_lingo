@@ -17,19 +17,25 @@ def random_string(length: int = 5) -> str:
 
 def load_audio_from_bytes(audio_bytes, sample_rate=16000):
     # Use BytesIO to simulate file I/O
-    with BytesIO(audio_bytes) as audio_file:
-        # Load audio using pydub
-        audio = AudioSegment.from_file(audio_file)
-        # Convert to raw audio data (samples)
-        samples = np.array(audio.get_array_of_samples())
-        # If stereo, take one channel
-        if audio.channels == 2:
-            samples = samples[::2]
-        # Resample the audio if the sample rate is different
-        if audio.frame_rate != sample_rate:
-            import librosa
-            samples = librosa.resample(samples.astype(np.float32), orig_sr=audio.frame_rate, target_sr=sample_rate)
-        return samples
+    audio_file = BytesIO(audio_bytes)
+    
+    # Load audio using pydub
+    audio = AudioSegment.from_file(audio_file, format="m4a")
+    
+    # Export to WAV format in memory
+    wav_io = BytesIO()
+    audio.export(wav_io, format="wav")
+    wav_io.seek(0)
+    
+    # Read the WAV file as numpy array
+    waveform, sr = sf.read(wav_io)
+    
+    # Resample if necessary
+    if sr != sample_rate:
+        import librosa
+        waveform = librosa.resample(waveform, orig_sr=sr, target_sr=sample_rate)
+    
+    return waveform
 
 @app.get("/health")
 async def health_check():
@@ -39,18 +45,56 @@ async def health_check():
     except Exception as e:
         raise HTTPException(status_code=500, detail="Health check failed")
 
+from fastapi import FastAPI, Request, Response
+import whisper
+import base64
+from pydub import AudioSegment
+from io import BytesIO
+import soundfile as sf
+import numpy as np
+
+app = FastAPI()
+
+def load_audio_from_bytes(audio_bytes, sample_rate=16000):
+    # Use BytesIO to simulate file I/O
+    audio_file = BytesIO(audio_bytes)
+    
+    # Load audio using pydub
+    audio = AudioSegment.from_file(audio_file, format="m4a")
+    
+    # Export to WAV format in memory
+    wav_io = BytesIO()
+    audio.export(wav_io, format="wav")
+    wav_io.seek(0)
+    
+    # Read the WAV file as numpy array
+    waveform, sr = sf.read(wav_io)
+    
+    # Resample if necessary
+    if sr != sample_rate:
+        import librosa
+        waveform = librosa.resample(waveform, orig_sr=sr, target_sr=sample_rate)
+    
+    return waveform
+
 @app.post("/whisper")
 async def transcribe(request: Request):
-    responseBody = await request.json()
-    text: str = responseBody['data']
-    textDecoded = base64.b64decode(text)
-    model: whisper.Whisper = whisper.load_model("tiny")
-    audioData = load_audio_from_bytes(textDecoded)
-    resultWhisper = model.transcribe(audioData, device="cpu")
+    response_body = await request.json()
+    audio_base64 = response_body['data']
+    
+    # Load the Whisper model
+    model = whisper.load_model("tiny")
+    
+    # Convert base64-encoded bytes to audio data
+    audio_data = load_audio_from_bytes(audio_base64)
+    
+    # Transcribe the audio data
+    result_whisper = model.transcribe(audio_data, language="french")
+    
     print("resultat")
-    print(resultWhisper["text"])
-
-    response = Response()
+    print(result_whisper["text"])
+    
+    response = Response(content=result_whisper["text"], media_type="text/plain")
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
     response.headers["Access-Control-Allow-Credentials"] = "true"
