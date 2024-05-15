@@ -13,12 +13,6 @@ export default function App() {
   const [audioFile, setAudioFile] = useState({ name: '', data: '' });
   const [dataOutput, setDataOutput] = useState('Data');
   const [statusOutput, setStatusOutput] = useState('Status');
-<<<<<<< HEAD
-  const spaceName = 'tlemagny/signalingo_whisper';
-  const readingToken = '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';
-  const writingToken = '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';
-=======
->>>>>>> 724c438 (commit before crash)
   const [isTranscribing, setIsTranscribing] = useState(false);
 
   const blobToBase64 = async (blob): Promise<string> => {
@@ -43,54 +37,6 @@ export default function App() {
       console.log('Transcription is already in progress. Please wait.');
       return;
     }
-<<<<<<< HEAD
-    setDataOutput('Data : Transcribing your file ...');
-    // const app = await client(spaceName, {hf_token : readingToken});
-    // const app = await client("openai/whisper");
-    const app = await client('hf-audio/whisper-large-v3', {});
-    await updateHardware(writingToken, spaceName, 'cpu-basic');
-    const submission = app.submit('/predict_1', [audioFile, 'transcribe']);
-    setIsTranscribing(true);
-    submission.on('data', (data) => {
-      console.log(data);
-      setDataOutput(data.data[0] as string);
-      setIsTranscribing(false);
-      getVideoFromText(data.data[0] as string).then((url) => {
-        setVideoURL(url);
-      });
-      updateHardware(writingToken, spaceName, 'cpu-basic');
-    });
-    submission.on('status', (status) => {
-      console.log(status);
-      setStatusOutput(`Status: ${status.stage}, Queue Position: ${status.position}, Queue Size: ${status.size}`);
-    });
-  }
-
-  async function updateHardware(hfToken: string, spaceName: string, hardwareFlavor: string, sleepTimeSeconds = 3600) {
-    const url = `https://huggingface.co/api/spaces/${spaceName}/hardware`;
-    const headers = {
-      Authorization: `Bearer ${hfToken}`,
-      'Content-Type': 'application/json',
-    };
-    const body = JSON.stringify({
-      flavor: hardwareFlavor,
-      sleepTimeSeconds,
-    });
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log('Hardware update response:', data);
-    return data;
-  }
-
-=======
     setDataOutput("Data : Transcribing your file ...");
     setIsTranscribing(true);
 		callWhisper(audioFile.data).then((text: string) => {
@@ -100,8 +46,6 @@ export default function App() {
 			getVideoFromText(text).then(url => setVideoURL(url))
 		})
   }
-
->>>>>>> 724c438 (commit before crash)
   async function startRecording() {
     try {
       const perm = await Audio.requestPermissionsAsync();
@@ -156,16 +100,6 @@ export default function App() {
       name: file.name,
       data: file.uri.split(',')[1],
     });
-  }
-
-  function displayMainContent() {
-    if (recording) {
-      return <Text style={styles.text}>Écoute...</Text>;
-    } else if (lastRec) {
-      return <img style={styles.sl} src="./assets/slPlaceholder.png" />;
-    } else {
-      return <Text style={styles.text}>Appuyer pour commencer</Text>;
-    }
   }
 
   const [videoURL, setVideoURL] = useState<string | null>();
