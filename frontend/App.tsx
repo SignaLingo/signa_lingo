@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, StyleSheet, View, Pressable, Text, TextInput } from 'react-native';
 import { Audio, ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getVideoFromText } from './lib/callAPI';
+import { callWhisper, getVideoFromText } from './lib/callAPI';
 import * as DocumentPicker from 'expo-document-picker';
 import { client } from '@gradio/client';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -13,9 +13,12 @@ export default function App() {
   const [audioFile, setAudioFile] = useState({ name: '', data: '' });
   const [dataOutput, setDataOutput] = useState('Data');
   const [statusOutput, setStatusOutput] = useState('Status');
+<<<<<<< HEAD
   const spaceName = 'tlemagny/signalingo_whisper';
   const readingToken = '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';
   const writingToken = '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';
+=======
+>>>>>>> 724c438 (commit before crash)
   const [isTranscribing, setIsTranscribing] = useState(false);
 
   const blobToBase64 = async (blob): Promise<string> => {
@@ -40,6 +43,7 @@ export default function App() {
       console.log('Transcription is already in progress. Please wait.');
       return;
     }
+<<<<<<< HEAD
     setDataOutput('Data : Transcribing your file ...');
     // const app = await client(spaceName, {hf_token : readingToken});
     // const app = await client("openai/whisper");
@@ -86,6 +90,18 @@ export default function App() {
     return data;
   }
 
+=======
+    setDataOutput("Data : Transcribing your file ...");
+    setIsTranscribing(true);
+		callWhisper(audioFile.data).then((text: string) => {
+			console.log(text)
+			setDataOutput(text)
+			setIsTranscribing(false)
+			getVideoFromText(text).then(url => setVideoURL(url))
+		})
+  }
+
+>>>>>>> 724c438 (commit before crash)
   async function startRecording() {
     try {
       const perm = await Audio.requestPermissionsAsync();

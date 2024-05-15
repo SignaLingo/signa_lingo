@@ -1,3 +1,15 @@
+export const callWhisper = async (audioData: string) => {
+	console.log(audioData)
+	const response = await fetch('http://127.0.0.1:8000/whisper', {
+		method: 'POST',
+		mode: 'cors',
+		body: JSON.stringify({ data : audioData })
+	})
+	const jsonResponse = await response.json()
+	const { text } = jsonResponse
+	return text
+}
+
 export const getVideoFromText = async (text: string, spoken: string = 'fr', signed: string = 'fsl') => {
   const baseURL: string = 'https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose';
   const fullURL: string = `${baseURL}?text=${text}&spoken=${spoken}&signed=${signed}`;
@@ -7,6 +19,7 @@ export const getVideoFromText = async (text: string, spoken: string = 'fr', sign
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
   const byteArray: Uint8Array = new Uint8Array(arrayBuffer);
 
+<<<<<<< HEAD
   // TODO a mettre dans une variable d'environnement (l'url du backend).!!
   const responseVideo = await fetch('https://signalingo.xyz/backend/pose-to-video', {
     method: 'POST',
@@ -18,3 +31,15 @@ export const getVideoFromText = async (text: string, spoken: string = 'fr', sign
   const url = URL.createObjectURL(blob);
   return url;
 };
+=======
+	// TODO a mettre dans une variable d'environnement (l'url du backend).!!
+  const responseVideo = await fetch('http://127.0.0.1:8000/pose-to-video', {
+    method: 'POST',
+		mode: 'cors',
+		body: JSON.stringify({ data : byteArray.join() })
+  })
+	const blob = await responseVideo.blob();
+	const url = URL.createObjectURL(blob);
+	return url
+}
+>>>>>>> 724c438 (commit before crash)

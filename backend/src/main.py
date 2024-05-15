@@ -3,11 +3,33 @@ from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
 import string
 import random
+import whisper
+import numpy as np
+import soundfile as sf
+from io import BytesIO
+from pydub import AudioSegment
+import base64
 
 app = FastAPI(root_path="/backend")
 
 def random_string(length: int = 5) -> str:
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+def load_audio_from_bytes(audio_bytes, sample_rate=16000):
+    # Use BytesIO to simulate file I/O
+    with BytesIO(audio_bytes) as audio_file:
+        # Load audio using pydub
+        audio = AudioSegment.from_file(audio_file)
+        # Convert to raw audio data (samples)
+        samples = np.array(audio.get_array_of_samples())
+        # If stereo, take one channel
+        if audio.channels == 2:
+            samples = samples[::2]
+        # Resample the audio if the sample rate is different
+        if audio.frame_rate != sample_rate:
+            import librosa
+            samples = librosa.resample(samples.astype(np.float32), orig_sr=audio.frame_rate, target_sr=sample_rate)
+        return samples
 
 @app.get("/health")
 async def health_check():
@@ -16,6 +38,23 @@ async def health_check():
         return {"status": "healthy"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Health check failed")
+
+@app.post("/whisper")
+async def transcribe(request: Request):
+    responseBody = await request.json()
+    text: str = responseBody['data']
+    textDecoded = base64.b64decode(text)
+    model: whisper.Whisper = whisper.load_model("tiny")
+    audioData = load_audio_from_bytes(textDecoded)
+    resultWhisper = model.transcribe(audioData, device="cpu")
+    print("resultat")
+    print(resultWhisper["text"])
+
+    response = Response()
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 @app.post("/pose-to-video")
 async def pose_to_video(request: Request):
