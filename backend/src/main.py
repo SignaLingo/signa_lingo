@@ -1,15 +1,11 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, File, UploadFile
 from fastapi.responses import JSONResponse
 from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
 import string
 import random
 import whisper
-import numpy as np
-import soundfile as sf
-from io import BytesIO
-from pydub import AudioSegment
-import base64
+import tempfile
 
 app = FastAPI(root_path="/backend")
 
@@ -24,45 +20,24 @@ async def health_check():
     except Exception as e:
         raise HTTPException(status_code=500, detail="Health check failed")
 
-def load_audio_from_bytes(audio_bytes, sample_rate=16000):
-    # Use BytesIO to simulate file I/O
-    audio_file = BytesIO(audio_bytes)
-    
-    # Load audio using pydub
-    audio = AudioSegment.from_file(audio_file, format="m4a")
-    
-    # Export to WAV format in memory
-    wav_io = BytesIO()
-    audio.export(wav_io, format="wav")
-    wav_io.seek(0)
-    
-    # Read the WAV file as numpy array
-    waveform, sr = sf.read(wav_io)
-    
-    # Resample if necessary
-    if sr != sample_rate:
-        import librosa
-        waveform = librosa.resample(waveform, orig_sr=sr, target_sr=sample_rate)
-    
-    return waveform
-
 @app.post("/whisper")
-async def transcribe(request: Request):
-    response_body = await request.json()
-    audio_base64 = response_body['data']
+async def transcribe(audio: UploadFile = File(...)):
     
-    # Load the Whisper model
     model = whisper.load_model("tiny")
-    
-    # Convert base64-encoded bytes to audio data
-    # audio_data = load_audio_from_bytes(audio_base64)
-    
+    file_location = 'recording.wav' 
+
+    with open(file_location, "wb+") as file_object:
+        file_object.write(await audio.read())
+
     # Transcribe the audio data
-    result_whisper = model.transcribe('test.mp3', language="french")
+    result_whisper = model.transcribe(file_location, language="french")
     transcription_text = result_whisper['text']
     print(transcription_text)
     
     response = JSONResponse(content={"data": transcription_text}, media_type="text/plain")
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 @app.post("/pose-to-video")
@@ -76,6 +51,7 @@ async def pose_to_video(request: Request):
     byte_array = bytes(pose_data)
     pose = Pose.read(byte_array)
     v = PoseVisualizer(pose)
+    print(file_path)
     v.save_video(file_path, v.draw())
     with open(file_path, 'rb') as f:
         content = f.read()

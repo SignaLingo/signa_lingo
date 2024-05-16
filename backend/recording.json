@@ -1,0 +1,1 @@
+{"text": " Bonjour, je m'appelle Alexie", "segments": [{"id": 0, "seek": 0, "start": 0.0, "end": 2.0, "text": " Bonjour, je m'appelle Alexie", "tokens": [50364, 25431, 11, 1506, 275, 6, 25543, 5202, 414, 50464], "temperature": 0.0, "avg_logprob": -0.4053778648376465, "compression_ratio": 0.7777777777777778, "no_speech_prob": 0.07559274137020111}], "language": "fr"}

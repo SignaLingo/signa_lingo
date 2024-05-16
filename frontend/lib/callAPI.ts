@@ -1,13 +1,14 @@
-export const callWhisper = async (audioData: string) => {
-	console.log(audioData)
+export const callWhisper = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('audio', blob, 'recording.wav');
 	const response = await fetch('http://127.0.0.1:8000/whisper', {
 		method: 'POST',
-		mode: 'no-cors',
-		body: JSON.stringify({ data : audioData })
+		mode: 'cors',
+        body: formData
 	})
-	console.log(response)
-	const { text } = response
-	return text
+	const { data } = await response.json()
+	console.log(data)
+	return data
 }
 
 export const getVideoFromText = async (text: string, spoken: string = 'fr', signed: string = 'fsl') => {
