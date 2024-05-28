@@ -1,5 +1,3 @@
-node_modules
-Dockerfile
-.dockerignore
-npm-debug.log
-README.md
+*
+!requirements.txt
+!package.json
