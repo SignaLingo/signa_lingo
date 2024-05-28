@@ -23,16 +23,16 @@ FROM python:3.9-slim
 
 WORKDIR /usr/app
 
+RUN apt-get update
+
 # Install runtime dependencies for OpenCV
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
     libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender1
-
-# Install ffmpeg for openai-whisper
-sudo apt update && sudo apt install ffmpeg
+    libxrender1 \
+    ffmpeg
 
 # Copy virtual environment from the builder stage
 COPY --from=builder /usr/app/venv ./venv

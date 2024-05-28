@@ -3,4 +3,5 @@ fastapi==0.110.1
 uvicorn==0.29.0
 opencv-python
 vidgear==0.3.2
-openai-whisper
+openai-whisper==20231117
+python-multipart==0.0.9
