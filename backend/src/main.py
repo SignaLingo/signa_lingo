@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Response, File, UploadFile, HTTPException, CORS
+from fastapi import FastAPI, Request, Response, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pose_format import Pose
