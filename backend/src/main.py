@@ -1,13 +1,25 @@
-from fastapi import FastAPI, Request, Response, File, UploadFile
+from fastapi import FastAPI, Request, Response, File, UploadFile, HTTPException, CORS
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
 import string
 import random
 import whisper
 import tempfile
+import os
 
 app = FastAPI(root_path="/backend")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    # sale a netoyer pour filter uniquement notre url
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def random_string(length: int = 5) -> str:
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
@@ -15,29 +27,24 @@ def random_string(length: int = 5) -> str:
 @app.get("/health")
 async def health_check():
     try:
-        # todo perform health check here
         return {"status": "healthy"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Health check failed")
 
 @app.post("/whisper")
 async def transcribe(audio: UploadFile = File(...)):
-    
     model = whisper.load_model("tiny")
-    file_location = 'recording.wav' 
-
-    with open(file_location, "wb+") as file_object:
-        file_object.write(await audio.read())
-
-    # Transcribe the audio data
-    result_whisper = model.transcribe(file_location, language="french")
+    
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
+        temp_audio_file.write(await audio.read())
+        temp_file_location = temp_audio_file.name
+    
+    result_whisper = model.transcribe(temp_file_location, language="french")
     transcription_text = result_whisper['text']
     print(transcription_text)
-    
+
+    os.remove(temp_file_location)
     response = JSONResponse(content={"data": transcription_text}, media_type="text/plain")
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 @app.post("/pose-to-video")
@@ -56,8 +63,4 @@ async def pose_to_video(request: Request):
     with open(file_path, 'rb') as f:
         content = f.read()
     response = Response(content=content, media_type="video/mp4")
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}.mp4"
     return response
