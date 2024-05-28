@@ -31,6 +31,9 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender1
 
+# Install ffmpeg for openai-whisper
+sudo apt update && sudo apt install ffmpeg
+
 # Copy virtual environment from the builder stage
 COPY --from=builder /usr/app/venv ./venv
 
