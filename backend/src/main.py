@@ -76,7 +76,7 @@ async def pose_to_video(request: Request):
         pose = Pose.read(byte_array)
         v = PoseVisualizer(pose)
         print(temp_file.name)
-        v.save_video(temp_file.name, v.draw())
+        v.save_video(temp_file.name, v.draw((40, 40, 40)))
 
         temp_file.flush()
         os.fsync(temp_file.fileno())
