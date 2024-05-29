@@ -1,16 +1,16 @@
+import os
+import tempfile
+import string
+import random
+
 from fastapi import FastAPI, Request, Response, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
-import string
-import random
 import whisper
-import tempfile
-import os
 
 app = FastAPI(root_path="/backend")
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,13 +26,25 @@ def random_string(length: int = 5) -> str:
 
 @app.get("/health")
 async def health_check():
+    """
+    Health check endpoint to verify if the service is running correctly.
+
+    Returns:
+        JSON response with the status of the service.
+    """
     try:
         return {"status": "healthy"}
-    except Exception as e:
+    except Exception as _:
         raise HTTPException(status_code=500, detail="Health check failed")
 
 @app.post("/whisper")
 async def transcribe(audio: UploadFile = File(...)):
+    """
+    Transcribe an audio file using whisper and return the contained text
+
+    Retuns:
+        JSON response with the audio text file
+    """
     model = whisper.load_model("tiny")
     
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
@@ -49,18 +61,30 @@ async def transcribe(audio: UploadFile = File(...)):
 
 @app.post("/pose-to-video")
 async def pose_to_video(request: Request):
-    filename: str = random_string()
-    file_path: str = f'mp4Files/{filename}.mp4'
+    """
+    Convert a pose file to an mp4 video.
 
+    Returns:
+        mp4 video
+    """
     response_body = await request.json()
     pose_data = response_body['data']
     pose_data = list(map(int, pose_data.split(',')))
     byte_array = bytes(pose_data)
-    pose = Pose.read(byte_array)
-    v = PoseVisualizer(pose)
-    print(file_path)
-    v.save_video(file_path, v.draw())
-    with open(file_path, 'rb') as f:
-        content = f.read()
+
+    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
+        pose = Pose.read(byte_array)
+        v = PoseVisualizer(pose)
+        print(temp_file.name)
+        v.save_video(temp_file.name, v.draw())
+
+        temp_file.flush()
+        os.fsync(temp_file.fileno())
+        temp_file.seek(0)
+
+        content = temp_file.read()
+
+    os.remove(temp_file.name)
+
     response = Response(content=content, media_type="video/mp4")
     return response
