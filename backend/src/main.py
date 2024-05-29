@@ -51,7 +51,7 @@ async def transcribe(audio: UploadFile = File(...)):
         temp_audio_file.write(await audio.read())
         temp_file_location = temp_audio_file.name
     
-    result_whisper = model.transcribe(temp_file_location, language="french")
+    result_whisper = model.transcribe(temp_file_location, language="french", fp16=False)
     transcription_text = result_whisper['text']
     print(transcription_text)
 
@@ -75,8 +75,7 @@ async def pose_to_video(request: Request):
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
         pose = Pose.read(byte_array)
         v = PoseVisualizer(pose)
-        print(temp_file.name)
-        v.save_video(temp_file.name, v.draw((40, 40, 40)))
+        v.save_gif(temp_file.name, v.draw(background_color=(34, 28, 25)))
 
         temp_file.flush()
         os.fsync(temp_file.fileno())
@@ -86,5 +85,5 @@ async def pose_to_video(request: Request):
 
     os.remove(temp_file.name)
 
-    response = Response(content=content, media_type="video/mp4")
+    response = Response(content=content, media_type="image/gif")
     return response

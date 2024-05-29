@@ -44,6 +44,6 @@ COPY src/ ./src/
 RUN useradd -m myuser
 USER myuser
 
-EXPOSE 8080
+EXPOSE 80
 
-CMD ["./venv/bin/uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["./venv/bin/uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
