@@ -18,3 +18,13 @@ services:
       - backend
     environment:
       - NODE_ENV=local
+
+  whisper-asr:
+    build:
+      context: ./whisper-asr-webservice
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - ASR_ENGINE=faster_whisper
+      - ASR_MODEL=base

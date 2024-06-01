@@ -1,13 +1,15 @@
-export const callWhisper = async (blob: Blob) => {
-  const formData = new FormData();
-  formData.append('audio', blob, 'recording.wav');
-  let backend_url = process.env.EXPO_PUBLIC_BACKEND_URL;
-  const response = await fetch(`${backend_url}/whisper`, {
+export const callWhisper = async (blob: Blob, language_code: string) => {
+  const form = new FormData();
+  form.append('audio_file', blob, 'recording.wav');
+  let whisper_url = process.env.EXPO_PUBLIC_WHISPER_WEB_SERVICE_URL;
+  const response = await fetch(`${whisper_url}/asr?language=${language_code}&output=txt&vat_filter=true`, {
     method: 'POST',
-    mode: 'cors',
-    body: formData,
+    headers: {
+      accept: 'text/plain',
+    },
+    body: form,
   });
-  const { data } = await response.json();
+  const data = await response.text();
   return data;
 };
 

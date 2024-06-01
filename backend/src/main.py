@@ -8,9 +8,20 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pose_format import Pose
 from pose_format.pose_visualizer import PoseVisualizer
+from contextlib import asynccontextmanager
 import whisper
 
-app = FastAPI(root_path="/backend")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.model = whisper.load_model("tiny")
+    print("loaded global whisper model")
+    yield
+    del app.state.model
+
+def random_string(length: int = 5) -> str:
+    return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+app = FastAPI(root_path="/backend", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,9 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-def random_string(length: int = 5) -> str:
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
 
 @app.get("/health")
 async def health_check():
@@ -38,20 +46,19 @@ async def health_check():
         raise HTTPException(status_code=500, detail="Health check failed")
 
 @app.post("/whisper")
-async def transcribe(audio: UploadFile = File(...)):
+async def transcribe(request: Request, audio: UploadFile = File(...)):
     """
     Transcribe an audio file using whisper and return the contained text
 
     Retuns:
         JSON response with the audio text file
     """
-    model = whisper.load_model("tiny")
     
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
         temp_audio_file.write(await audio.read())
         temp_file_location = temp_audio_file.name
     
-    result_whisper = model.transcribe(temp_file_location, language="french", fp16=False)
+    result_whisper = request.app.state.model.transcribe(temp_file_location, language="french", fp16=False)
     transcription_text = result_whisper['text']
     print(transcription_text)
 
@@ -75,7 +82,7 @@ async def pose_to_video(request: Request):
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
         pose = Pose.read(byte_array)
         v = PoseVisualizer(pose)
-        v.save_gif(temp_file.name, v.draw(background_color=(34, 28, 25)))
+        v.save_gif(temp_file.name, v.draw(background_color=(37, 37, 37)))
 
         temp_file.flush()
         os.fsync(temp_file.fileno())
