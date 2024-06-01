@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { imageAssets } from '../assets/imageAssets';
 
 const Header = () => {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#dfdfdf'
+    color: '#dfdfdf',
   },
 });
 

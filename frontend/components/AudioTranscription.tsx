@@ -7,10 +7,10 @@ interface AudioTranscriptionProps {
   onRecordingStart: () => void;
   onRecordingEnd: () => void;
   onNewTranscribeChunk: (chunk: string) => void;
-  languageCode: string,
+  languageCode: string;
 }
 
-const AudioTranscription= (props: AudioTranscriptionProps) => {
+const AudioTranscription = (props: AudioTranscriptionProps) => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const listenedTextRef = useRef('');
@@ -62,17 +62,17 @@ const AudioTranscription= (props: AudioTranscriptionProps) => {
   const processRecording = () => {
     const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
     callWhisper(audioBlob, props.languageCode).then((newText) => {
-      console.log(`currently stored listend text: ${listenedTextRef.current}`)
-      console.log(`new text comming from whisper: ${newText}`)
+      console.log(`currently stored listend text: ${listenedTextRef.current}`);
+      console.log(`new text comming from whisper: ${newText}`);
       if (newText.length > listenedTextRef.current.length) {
-        console.log("adding new text to the listened one")
+        console.log('adding new text to the listened one');
         listenedTextRef.current = newText;
         props.onNewTranscribeChunk(newText);
         resetInactivityTimeout();
       }
     });
   };
-  
+
   const resetInactivityTimeout = () => {
     //@ts-expect-error
     clearTimeout(inactivityTimeout.current);
@@ -95,6 +95,5 @@ const AudioTranscription= (props: AudioTranscriptionProps) => {
     </Pressable>
   );
 };
-
 
 export default AudioTranscription;

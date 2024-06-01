@@ -10,11 +10,8 @@ interface LanguageProps {
 
 const Language = ({ flag, selected, disabled, onSelect }: LanguageProps) => {
   return (
-    <TouchableOpacity
-      onPress={disabled ? undefined : onSelect}
-      disabled={disabled}
-    >
-    <View style={[styles.container, disabled && styles.disabled]}>
+    <TouchableOpacity onPress={disabled ? undefined : onSelect} disabled={disabled}>
+      <View style={[styles.container, disabled && styles.disabled]}>
         <Text style={[styles.flagText, disabled && styles.flagTextDisabled]}>{flag}</Text>
         <View style={[styles.underline, selected && !disabled && styles.selected]} />
       </View>

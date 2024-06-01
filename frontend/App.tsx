@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Pressable, Dimensions, Text, Image, TextInput } from 'react-native';
-import Translation from './components/Translation';
+import React, {  } from 'react';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import Header from './components/Header';
+import TextToPose from './components/TextToPose';
 
 export default function App() {
   return (
     <View style={styles.main}>
       <Header></Header>
       <View style={styles.container}>
-        <Translation></Translation>
+        <TextToPose></TextToPose>
       </View>
     </View>
   );
