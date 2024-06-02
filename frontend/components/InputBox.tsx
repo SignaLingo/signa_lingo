@@ -6,6 +6,7 @@ import InputField from './InputField';
 
 interface InputBoxProps {
   onInputFinish: (input: string) => void;
+  onLanguageCodeChange: (newCode: string) => void;
 }
 
 const InputBox = (props: InputBoxProps) => {
@@ -13,6 +14,11 @@ const InputBox = (props: InputBoxProps) => {
   const [lettersCount, setLettersCount] = useState(0);
   const recorderTextRef = useRef('');
   const textFieldTextRef = useRef('');
+
+  function handleLanguageChange(newLanguageCode: string) {
+    setSelectedLanguage(newLanguageCode);
+    props.onLanguageCodeChange(newLanguageCode);
+  }
 
   /*
    * Called when the child `AudioTranscriptor` start a new recording session
@@ -36,10 +42,12 @@ const InputBox = (props: InputBoxProps) => {
    */
   function handleNewTranscribedChunk(chunk: string) {
     recorderTextRef.current = chunk;
+    setLettersCount(chunk.length);
   }
 
   function handleTextFieldChange(text: string) {
     textFieldTextRef.current = text;
+    setLettersCount(text.length);
   }
 
   return (
@@ -48,19 +56,19 @@ const InputBox = (props: InputBoxProps) => {
         <Language
           flag="🇫🇷"
           selected={selectedLanguage === 'fr'}
-          onSelect={() => setSelectedLanguage('fr')}
+          onSelect={() => handleLanguageChange('fr')}
           disabled={false}
         />
         <Language
           flag="🇺🇸"
           selected={selectedLanguage === 'en'}
-          onSelect={() => setSelectedLanguage('en')}
-          disabled={true}
+          onSelect={() => handleLanguageChange('en')}
+          disabled={false}
         />
         <Language
           flag="🇩🇪"
           selected={selectedLanguage === 'de'}
-          onSelect={() => setSelectedLanguage('de')}
+          onSelect={() => handleLanguageChange('de')}
           disabled={true}
         />
       </View>

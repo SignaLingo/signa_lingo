@@ -1,50 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { getGifFromText } from '../lib/callAPI';
 
 interface PoseViewProps {
   toTranslate: string | undefined;
+  languageCode: string;
+  signLanguageCode: string;
 }
 
-const PoseView = (props: PoseViewProps) => {
+function PoseView(props: PoseViewProps) {
   const [gifUrl, setGifUrl] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const fullCode: Record<string, string> = {
+    'fsl': 'French sign language',
+    'asl': 'American sign language',
+  }
 
   useEffect(() => {
     const fetchGif = async () => {
       if (props.toTranslate) {
         setLoading(true);
         try {
-          const url = await getGifFromText(props.toTranslate, 'fr', 'fsl');
-          console.log('retrieved gif');
+          const url = await getGifFromText(props.toTranslate, props.languageCode, props.signLanguageCode);
           setGifUrl(url);
+          setFetchError('');
         } catch (error) {
           console.error('Error fetching GIF:', error);
+          const message = error instanceof Error ? error.message : 'Unknown error occurred';
+          setFetchError(message || 'Failed to fetch GIF');
+          setGifUrl('');
         } finally {
           setLoading(false);
         }
       } else {
         setLoading(false);
-        setGifUrl(undefined);
+        setGifUrl('');
       }
     };
+
     fetchGif();
   }, [props.toTranslate]);
 
   return (
     <View style={styles.container}>
       <View style={styles.viewerHeader}>
-        <Text style={styles.emojiText}>🧏 Sign language translation</Text>
+        <Text style={styles.emojiText}>🧏 {fullCode[props.signLanguageCode]} translation</Text>
       </View>
       <View style={styles.imageContainer}>
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
+        ) : gifUrl ? (
+          <Image source={{ uri: gifUrl }} style={styles.image} />
         ) : (
-          gifUrl ? (
-            <Image source={{ uri: gifUrl }} style={styles.image} />
-          ) : (
-            <Text>Cannot translate to pose</Text>
-          )
+          fetchError && <Text style={styles.errorText}>{fetchError}</Text>
         )}
       </View>
     </View>
@@ -52,6 +62,10 @@ const PoseView = (props: PoseViewProps) => {
 };
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: "#DFDFDF",
+    fontSize: 38,
+  },
   container: {
     flex: 1,
   },

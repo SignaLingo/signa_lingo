@@ -25,7 +25,7 @@ const InputField = (props: InputFieldProps) => {
     // reflect it on the input
     // the callback is not called because
     // this is the concern of the audio recorder
-    if (props.externalValue && props.externalValue !== inputText) {
+    if (props.externalValue !== undefined && props.externalValue !== inputText) {
       setInputText(props.externalValue);
     }
   }, [props.externalValue])

@@ -14,18 +14,20 @@ export const callWhisper = async (blob: Blob, language_code: string) => {
 };
 
 export const getGifFromText = async (text: string, spoken: string = 'fr', signed: string = 'fsl') => {
-  if (text === undefined || text === '') {
-    return;
-  }
-
   const back_url = process.env.EXPO_PUBLIC_BACKEND_URL;
   const baseURL = process.env.EXPO_PUBLIC_VIDEO_FROM_TEXT_URL;
   const fullURL: string = `${baseURL}?text=${text}&spoken=${spoken}&signed=${signed}`;
 
+  console.log(`asking backend to translate ${text} to pose`);
   const response: Response = await fetch(fullURL);
 
-  if (!response.ok) return;
-  if (response.body == null) return;
+  if (!response.ok) {
+    throw new Error(`No pose found for text ${text}`);
+  };
+
+  if (response.body == null) {
+    throw new Error("Empty pose  response just dropped");
+  }
 
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
   const byteArray: Uint8Array = new Uint8Array(arrayBuffer);
@@ -35,6 +37,11 @@ export const getGifFromText = async (text: string, spoken: string = 'fr', signed
     mode: 'cors',
     body: JSON.stringify({ data: byteArray.join() }),
   });
+
+  if (!responseVideo.ok) {
+    throw new Error("Cannot convert pose file to gif!")
+  }
+
   const blob = await responseVideo.blob();
   const url = URL.createObjectURL(blob);
   return url;
