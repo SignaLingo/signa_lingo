@@ -13,7 +13,7 @@ export const callWhisper = async (blob: Blob, language_code: string) => {
   return data;
 };
 
-export const getGifFromText = async (text: string, spoken: string = 'fr', signed: string = 'fsl') => {
+export const getGifFromText = async (text: string, spoken: string, signed: string) => {
   const back_url = process.env.EXPO_PUBLIC_BACKEND_URL;
   const baseURL = process.env.EXPO_PUBLIC_VIDEO_FROM_TEXT_URL;
   const fullURL: string = `${baseURL}?text=${text}&spoken=${spoken}&signed=${signed}`;
