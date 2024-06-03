@@ -11,7 +11,7 @@ const TextToPose = () => {
 
   const languageSignLanguageMap : Record<string, string> = {
     'fr': 'fsl',
-    'en': 'asl',
+    'en': 'ase',
   };
 
   function handleFinishInput(input: string) {

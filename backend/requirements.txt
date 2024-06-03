@@ -6,3 +6,4 @@ vidgear==0.3.2
 openai-whisper==20231117
 python-multipart==0.0.9
 Pillow
+aiofiles

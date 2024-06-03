@@ -15,7 +15,7 @@ function PoseView(props: PoseViewProps) {
 
   const fullCode: Record<string, string> = {
     'fsl': 'French sign language',
-    'asl': 'American sign language',
+    'ase': 'American sign language',
   }
 
   useEffect(() => {

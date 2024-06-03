@@ -67,10 +67,8 @@ async def pose_to_video(request: Request):
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")  # Log error to the server's console or log file
-        # Remove temporary file if something goes wrong
         if 'temp_file' in locals() and os.path.exists(temp_file.name):
             os.remove(temp_file.name)
-        # Return an internal server error message
         return JSONResponse(
             status_code=500,
             content={"message": "Internal server error occurred. Please try again later."}

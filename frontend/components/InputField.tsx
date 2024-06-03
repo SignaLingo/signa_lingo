@@ -15,10 +15,24 @@ const InputField = (props: InputFieldProps) => {
   function handleTextChange(text: string) {
     setInputText(text);
     props.onTextFieldChange(text);
+    resetInactivityTimeout();
+  }
+  
+  function handleTypingTimeout() {
+    props.onInputEnd();
   }
 
-  // TODO text field timout
   const inactivityTimeout = useRef(null);
+
+  const resetInactivityTimeout = () => {
+    //@ts-expect-error
+    clearTimeout(inactivityTimeout.current);
+    //@ts-expect-error
+    inactivityTimeout.current = setTimeout(() => {
+      console.log('Stopping recording due to inactivity.');
+      handleTypingTimeout();
+    }, 2000);
+  };
 
   useEffect(() => {
     // if the audio recorder provide some text

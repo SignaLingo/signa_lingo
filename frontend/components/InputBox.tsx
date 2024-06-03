@@ -50,6 +50,10 @@ const InputBox = (props: InputBoxProps) => {
     setLettersCount(text.length);
   }
 
+  function handleTextFieldEnd() {
+    props.onInputFinish(textFieldTextRef.current);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.inputLanguageSelection}>
@@ -74,7 +78,7 @@ const InputBox = (props: InputBoxProps) => {
       </View>
       <InputField 
         onInputStart={() => {}}
-        onInputEnd={() => {}}
+        onInputEnd={handleTextFieldEnd}
         onTextFieldChange={handleTextFieldChange}
         externalValue={recorderTextRef.current}
       />
